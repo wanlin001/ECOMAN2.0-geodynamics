@@ -3,3 +3,7 @@
 drex_m
 drexs
 objects/
+*.xdmf
+*.h5
+*.vtu
+output/
