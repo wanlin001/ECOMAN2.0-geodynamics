@@ -2184,7 +2184,7 @@ contains
       allocate(SendSCR(n1*n2*SendNterm),nterm(SendNcomm),stat=ierr)
       if( ierr .ne. 0 ) then
          write(*,'(a,i5)') "*** ERROR in DistMrkValR : allocating sending scratches",rankMPI
-         return
+         stop
       endif
    endif
 
@@ -2416,7 +2416,7 @@ contains
       allocate(SendSCR(n1*n2*SendNterm),nterm(SendNcomm),stat=ierr)
       if( ierr .ne. 0 ) then
          write(*,'(a,i5)') "*** ERROR in DistMrkValI : allocating sending scratches",rankMPI
-         return
+         stop
       endif
    endif
 

@@ -395,9 +395,11 @@
    IF(Tinit == Tend) THEN
       timeback = timesum + timemax
    ELSE
-      !Initialize backward time
-      IF(t==Tend) timeback=timesum
-      !timeback = timesum
+      ! Reset backward reference time at every loaded file.
+      ! Otherwise timeback keeps drifting across files and can
+      ! become unrealistically large negative, which corrupts the
+      ! backward-time bookkeeping and makes runs appear stuck.
+      timeback = timesum
    END IF
 
    if ( rankMPI .eq. 1 ) then
@@ -869,4 +871,3 @@
    RETURN
 
    END SUBROUTINE forwardLPOadvection3D
-

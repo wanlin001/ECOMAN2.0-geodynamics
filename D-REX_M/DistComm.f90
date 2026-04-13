@@ -359,13 +359,9 @@ contains
    type(t_DistComm), intent(inout) :: DistComm_var
 
    ! Local variables
-   integer          :: i,ierr
-   integer          :: Ncomm
-   integer, pointer :: Comm(:) => null()
+   integer          :: ierr
    integer          :: SendNcomm
    integer, pointer :: SendStatus(:) => null()
-   logical          :: flag
-   integer          :: statusMPI(MPI_STATUS_SIZE)
 
    ! Set handles
    SendNcomm  =  DistComm_var%SendNcomm
@@ -373,36 +369,10 @@ contains
 
    if ( SendNcomm .eq. 0 ) return
 
-   ! initialize
-   Ncomm = SendNcomm
-   allocate(Comm(Ncomm),stat=ierr)
+   ! Wait for all sends to complete
+   call MPI_Waitall(SendNcomm, SendStatus(1:SendNcomm), MPI_STATUSES_IGNORE, ierr)
    if( ierr .ne. 0 ) then
-      write(*,'(a,i5)') "*** ERROR in WaitSendComm : allocating"
-      stop
-   endif
-   do i = 1,Ncomm
-      Comm(i) = i
-   end do
-
-   ! loop and test
-   i = 1
-   do while (Ncomm .gt. 0)
-      call MPI_Test(SendStatus(Comm(i)),flag,statusMPI,ierr)
-      if ( flag ) then
-         ! sended, remove from list
-         Comm(i) = Comm(Ncomm)
-         Ncomm = Ncomm - 1
-      else
-         ! not sended yet, go on
-         i = i + 1
-      endif
-      if ( i .gt. Ncomm ) i = 1
-   end do
-
-   ! deallocate
-   deallocate(Comm,stat=ierr)
-   if( ierr .ne. 0 ) then
-      write(*,'(a,i5)') "*** ERROR in WaitSendComm : deallocating"
+      write(*,'(a,i5)') "*** ERROR in WaitSendComm : MPI_Waitall failed"
       stop
    endif
 
@@ -430,13 +400,9 @@ contains
    type(t_DistComm), intent(inout) :: DistComm_var
 
    ! Local variables
-   integer          :: i,ierr
-   integer          :: Ncomm
-   integer, pointer :: Comm(:) => null()
+   integer          :: ierr
    integer          :: RecvNcomm
    integer, pointer :: RecvStatus(:) => null()
-   logical          :: flag
-   integer          :: statusMPI(MPI_STATUS_SIZE)
 
    ! Set handles
    RecvNcomm  =  DistComm_var%RecvNcomm
@@ -444,36 +410,10 @@ contains
 
    if ( RecvNcomm .eq. 0 ) return
 
-   ! initialize
-   Ncomm = RecvNcomm
-   allocate(Comm(Ncomm),stat=ierr)
+   ! Wait for all receives to complete
+   call MPI_Waitall(RecvNcomm, RecvStatus(1:RecvNcomm), MPI_STATUSES_IGNORE, ierr)
    if( ierr .ne. 0 ) then
-      write(*,'(a,i5)') "*** ERROR in WaitRecvComm : allocating"
-      stop
-   endif
-   do i = 1,Ncomm
-      Comm(i) = i
-   end do
-
-   ! loop and test
-   i = 1
-   do while (Ncomm .gt. 0)
-      call MPI_Test(RecvStatus(Comm(i)),flag,statusMPI,ierr)
-      if ( flag ) then
-         ! sended, remove from list
-         Comm(i) = Comm(Ncomm)
-         Ncomm = Ncomm - 1
-      else
-         ! not sended yet, go on
-         i = i + 1
-      endif
-      if ( i .gt. Ncomm ) i = 1
-   end do
-
-   ! deallocate
-   deallocate(Comm,stat=ierr)
-   if( ierr .ne. 0 ) then
-      write(*,'(a,i5)') "*** ERROR in WaitRecvComm : deallocating"
+      write(*,'(a,i5)') "*** ERROR in WaitRecvComm : MPI_Waitall failed"
       stop
    endif
 

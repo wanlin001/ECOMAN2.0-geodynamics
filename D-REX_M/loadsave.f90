@@ -1055,6 +1055,7 @@
    mrkdist = ptnmrk(rankMPI+1) - ptnmrk(rankMPI)
 
    ! Rocktype communications
+   if (rankMPI .eq. 1) write(*,'(a)') ' SAVE: redistributing marker data...'
    allocate(rkscr1(mrkdist))
    call DistMrkValI(1,1,rocktype(1:marknum00),rkscr1)
    if ( yinyang .eq. 2 ) then
@@ -1087,6 +1088,7 @@
    dum_int(1) = del1
    dum_int(2) = del2
    call MPI_Allgather(dum_int,2,MPI_INTEGER,alldel,2,MPI_INTEGER,MPI_COMM_WORLD,errMPI)
+   if (rankMPI .eq. 1) write(*,'(a)') ' SAVE: marker redistribution done, computing offsets...'
 
    ! Compute printing offsets
 
@@ -1131,9 +1133,11 @@
    ! Write infos in hdf5 format
    if (rankMPI .eq. 1 ) then
       write(*,*)
-      write(*,"(a)",ADVANCE='no') ' SAVE DATA TO ',trim(filename)
+      write(*,'(2a)') ' SAVE DATA TO ',trim(filename)
       write(*,*)
    endif
+
+   call MPI_Barrier(MPI_COMM_WORLD,errMPI)
 
    ! Initialize FORTRAN interface
    call h5open_f(errH5);
